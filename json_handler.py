@@ -5,6 +5,8 @@ import json
 
 from db_utils.utils import get_random_uuid
 
+from global_state import DEBUG
+
 class JSONHandler:
 
     def __init__(self):
@@ -39,7 +41,7 @@ class JSONHandler:
         with open(file_path, 'r') as file:
             data = json.load(file)
 
-        print(f"[DEBUG] Raw loaded data: {data} (type: {type(data).__name__}) path: {file_path}")
+        print(f"[DEBUG] Raw loaded data: {data} (type: {type(data).__name__}) path: {file_path}") if DEBUG else None
 
         if not isinstance(data, dict):
             raise TypeError(f"Expected JSON object (dict), got {type(data).__name__}")

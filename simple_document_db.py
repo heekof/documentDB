@@ -4,6 +4,8 @@ import os
 
 
 from json_handler import JSONHandler
+from global_state import DEBUG
+
 
 class SimpleDocumentDB:
     def __init__(self, db_path="mydb"):
@@ -22,7 +24,7 @@ class SimpleDocumentDB:
     def find(self, collection, query=None):
         self.update_ids_map()
 
-        results = []
+        results = {}
 
         for id in self.ids:
             document = self.get_document_by_id(id)
@@ -31,9 +33,9 @@ class SimpleDocumentDB:
                 if query:
                     for key, value in query.items():
                         if key in document and document[key] == value:
-                            results.append(document)
+                            results[id] = document
                 else:
-                    results.append(document)
+                    results[id] = document
 
         return results
 
