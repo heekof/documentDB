@@ -2,7 +2,8 @@ import uuid
 import json
 import os
 
-from db_utils import db_utils as util
+
+from json_handler import JSONHandler
 
 class SimpleDocumentDB:
     def __init__(self, db_path="mydb"):
@@ -15,13 +16,7 @@ class SimpleDocumentDB:
         ...
 
     def insert_one(self, collection, document):
-        """
-        if collection in collections, check document and then add it. otherwise create it.
-
-        db.insert_one("users", {"name": "Jaafar", "age": 34})
-
-        """
-        util.create_json_file_based_on_name(document, source_db=self, collection_name=collection)
+        return JSONHandler.parse_data(document, source_db=self, collection_name=collection)
 
     def find(self, collection, query=None):
         ...
@@ -41,7 +36,7 @@ class SimpleDocumentDB:
         return self.get_document_by_path(target_path)
 
     def get_document_by_path(self, path):
-        return util.read_json_file(path)
+        return JSONHandler.read_json_file(path)
 
     def update_ids_map(self):
         
