@@ -18,8 +18,29 @@ class SimpleDocumentDB:
     def insert_one(self, collection, document):
         return JSONHandler.parse_data(document, source_db=self, collection_name=collection)
 
+    # db.find("users", {"age": 34})
     def find(self, collection, query=None):
-        ...
+        self.update_ids_map()
+
+        results = []
+
+        for id in self.ids:
+            document = self.get_document_by_id(id)
+            document_dict = self.convert_to_dict(document)
+            if document:
+                if query:
+                    for key, value in query.items():
+                        if key in document and document[key] == value:
+                            results.append(document)
+                else:
+                    results.append(document)
+
+        return results
+
+    def convert_to_dict(self, document):
+        if isinstance(document, dict):
+            return document
+        return dict(document)
 
     def get_document_by_id(self, id):
 

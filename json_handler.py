@@ -16,26 +16,33 @@ class JSONHandler:
             json.loads(data)
             return True
         except (ValueError, TypeError):
-            raise TypeError(f"Expected a json, got {type(data).__name__}")
+            raise TypeError(f"Expected a json, got {type(data)}")
             return False
 
     @staticmethod
     def is_json_compatible(data) -> bool:
-        if isinstance(data, (dict, list)):  # JSON must be object or array at the top level
+        if not isinstance(data, dict):
+            raise TypeError(f"insert_one() expects a dict, got {type(data)}")
+        
+        if isinstance(data, (dict, list)):
             return True
         if isinstance(data, str):
             try:
                 json.loads(data)
                 return True
-            except ValueError:
+            except json.JSONDecodeError:
                 return False
         raise TypeError(f"Expected str, dict, or list. Got: {type(data).__name__}")
-
 
     @staticmethod
     def read_json_file(file_path):
         with open(file_path, 'r') as file:
             data = json.load(file)
+
+        print(f"[DEBUG] Raw loaded data: {data} (type: {type(data).__name__}) path: {file_path}")
+
+        if not isinstance(data, dict):
+            raise TypeError(f"Expected JSON object (dict), got {type(data).__name__}")
         return data
 
     @staticmethod
@@ -61,6 +68,7 @@ class JSONHandler:
                 }
 
         if not JSONHandler.is_json_compatible(data):
+            raise Exception(f"Data is not JSON compatible: {data}")
             return False
         
         JSONHandler.write_json_file(storage_path, data)
