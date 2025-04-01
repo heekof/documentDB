@@ -51,4 +51,4 @@ jobs:
       #    python -m unittest discover -s tests -v  (if tests are in a 'tests/' dir)
       - name: Run tests with unittest
         run: |
-          python -m unittest discover -v
+          python -m unittest discover -s tests
