@@ -1,9 +1,5 @@
 import json
-import os
-import json
-
 from global_state import DEBUG
-
 from errors import Error
 
 class JSONHandler:
@@ -37,7 +33,7 @@ class JSONHandler:
 
     @staticmethod
     def read_json_file(file_path):
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             data = json.load(file)
 
         print(f"[DEBUG] Raw loaded data: {data} (type: {type(data).__name__}) path: {file_path}") if DEBUG else None
@@ -48,7 +44,7 @@ class JSONHandler:
 
     @staticmethod
     def write_json_file(file_path, data):
-        with open(file_path, 'w') as file:
+        with open(file_path, 'w', encoding='utf-8') as file:
             json.dump(data, file, indent=4)
 
     @staticmethod
