@@ -2,7 +2,6 @@ import os
 import json
 from db_utils.utils import get_random_uuid
 
-
 from json_handler import JSONHandler
 from global_state import Settings
 
