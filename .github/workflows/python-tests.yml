@@ -20,7 +20,7 @@ jobs:
       fail-fast: false # Don't cancel other jobs in the matrix if one fails
       matrix:
         # Define different Python versions to test against
-        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12" ] # Adjust as needed
+        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12", "3.13" ] # Adjust as needed
 
     steps:
       # 1. Get the code from the repository
