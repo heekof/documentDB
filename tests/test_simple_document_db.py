@@ -7,6 +7,20 @@ from errors import DocumentNotFoundError
 
 class TestSimpleDocumentDB(unittest.TestCase):
 
+    _sample_data = {
+        "name": "Jaafar",
+        "age": 34,
+        "city": "Paris",
+        "country": "France"
+    }
+
+    _sample_data2 = """{
+        "name": "Ikram",
+        "age": 30,
+        "city": "Paris",
+        "country": "France"
+    }"""
+
     def setUp(self):
         # Setup a clean test database directory
         self.test_db_path = "test_db"
@@ -39,7 +53,7 @@ class TestSimpleDocumentDB(unittest.TestCase):
 
     def test_insert_and_find_str(self):
 
-        id_yasmina = self.db.insert_one("users", json.loads('{"name": "Yasmina", "age": 30}'))
+        id_yasmina = self.db.insert_one("users", '{"name": "Yasmina", "age": 30}')
         results = self.db.find("users", {"age": 30})
 
         for result in results :
@@ -49,7 +63,6 @@ class TestSimpleDocumentDB(unittest.TestCase):
     def test_get_document_by_id_not_found(self):
         with self.assertRaises(DocumentNotFoundError):
             self.db.get_document_by_id("c547e6bd-d291-482e-9e5d-6164211cff7d")
-
 
     def test_get_document_by_id_found(self):
         doc_id = self.db.insert_one("users", {"name": "Ikram", "age": 30})
@@ -78,6 +91,33 @@ class TestSimpleDocumentDB(unittest.TestCase):
         self.db.update_document_by_id("users", {"name": "Ikram", "age": 31}, doc_id)
         updated_doc = self.db.get_document_by_id(doc_id)
         self.assertEqual(updated_doc["age"], 31)
+
+    def test_update_document_by_id_check_all(self):
+        doc_id = self.db.insert_one("users", {"name": "Ikram", "age": 30})
+        self.db.update_document_by_id("users", {"name": "Ikram", "age": 31}, doc_id)
+        updated_doc = self.db.get_document_by_id(doc_id)
+        self.assertEqual(updated_doc, {"name": "Ikram", "age": 31})    
+
+    def test_hard_delete_document_by_id(self):
+        doc_id = self.db.insert_one("users", {"name": "Ikram", "age": 30})
+        self.db.hard_delete_document_by_id(doc_id)
+        with self.assertRaises(DocumentNotFoundError):
+            self.db.get_document_by_id(doc_id) 
+
+        with self.assertRaises(DocumentNotFoundError):
+            self.db.recover_document_by_id(doc_id)
+
+
+    def test_soft_delete_document_by_id(self):
+        doc_id = self.db.insert_one("users", self._sample_data)
+        self.db.delete_document_by_id(doc_id)
+
+        with self.assertRaises(DocumentNotFoundError):
+            self.db.get_document_by_id(doc_id)
+
+        self.db.recover_document_by_id(doc_id)
+        doc = self.db.get_document_by_id(doc_id)
+        self.assertEqual(doc, self._sample_data)
 
 if __name__ == '__main__':
     unittest.main()

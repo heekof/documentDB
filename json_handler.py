@@ -1,6 +1,8 @@
 import json
-from global_state import DEBUG
+from global_state import Settings
 from errors import Error
+
+DEBUG = Settings.DEBUG
 
 class JSONHandler:
 
@@ -18,9 +20,6 @@ class JSONHandler:
 
     @staticmethod
     def is_json_compatible(data) -> bool:
-        if not isinstance(data, dict):
-            raise Error(f"insert_one() expects a dict, got {type(data)}")
-        
         if isinstance(data, (dict, list)):
             return True
         if isinstance(data, str):
@@ -38,8 +37,8 @@ class JSONHandler:
 
         print(f"[DEBUG] Raw loaded data: {data} (type: {type(data).__name__}) path: {file_path}") if DEBUG else None
 
-        if not isinstance(data, dict):
-            raise Error(f"Expected JSON object (dict), got {type(data).__name__}")
+        # if not isinstance(data, dict):
+        #     raise Error(f"Expected JSON object (dict), got {type(data).__name__}")
         return data
 
     @staticmethod

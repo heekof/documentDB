@@ -4,7 +4,6 @@ import os
 
 from json_handler import JSONHandler
 from simple_document_db import SimpleDocumentDB
-from global_state import DEBUG
 
 
 db = SimpleDocumentDB()
@@ -18,14 +17,10 @@ print(f"Jaafar's id = {id_jaafar}")
 print(f"Ikram's id = {id_ikram}")
 print(f"Yasmina's id = {id_yasmina}")
 
-results = db.find("users", {"age": 30})
 
-data = db.get_document_by_id("c547e6bd-d291-482e-9e5d-6164211cff7d")
-
-print(f" Result = {results}")
 
 db.update_document_by_id(
     collection_name = "users", 
-    data = {"name": "Ikram", "age": 31}, 
-    id = "c547e6bd-d291-482e-9e5d-6164211cff7d"
+    data = {"age": 61}, 
+    id = id_ikram
     )
