@@ -13,14 +13,12 @@ id_ikram = db.insert_one("users", {"name": "Ikram", "age": 30})
 
 id_yasmina = db.insert_one("users", json.loads('{"name": "Yasmina", "age": 30}'))
 
-print(f"Jaafar's id = {id_jaafar}")
-print(f"Ikram's id = {id_ikram}")
-print(f"Yasmina's id = {id_yasmina}")
+name_index = {
+    "Jaafar": ["uuid1", "uuid2", "uuid3"],
+    "Ikram": ["uuid4", "uuid5"]
+}
 
+db.indexing_documents()
 
-
-db.update_document_by_id(
-    collection_name = "users", 
-    data = {"age": 61}, 
-    id = id_ikram
-    )
+for k,v in db.indexes.items():
+    print(k, v.index)

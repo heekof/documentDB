@@ -10,6 +10,10 @@ from document_state import DocumentStatus
 
 DEBUG = Settings.DEBUG
 
+from simple_index import SimpleIndex
+
+from db_utils.utils import get_all_values_from_dict
+
 class SimpleDocumentDB:
     def __init__(self, db_path="mydb", settings: Settings = Settings):
         # TODO: Implement logging instead of print statements for better debugging        
@@ -19,46 +23,16 @@ class SimpleDocumentDB:
         self.ids_collection = {}
         self.id_status = {}
         self.populating_db_state()
-
+        self.indexes = {}
         self.settings = Settings
+        self.document_values_to_index = []
+        self.indexing_documents()
 
         print(f"Database initialized at {self.db_path}")
 
         print(f"[DEBUG] settings = {self.settings}, type = {type(self.settings)}, port = {self.settings.get("port")}") if DEBUG else None
 
-    def get_path_by_id(self, id):
-                
-        if id in self.ids_collection:
-            return os.path.join(self.db_path, self.ids_collection[id], f"{id}.json")
-        return os.path.join(self.db_path, f"{id}.json")
 
-    def update_document_by_id(self, collection_name, data, id):
-        
-        document = self.get_document_by_id(id)
-        if not document:
-            print(f"Document {id} not found")
-            raise DocumentNotFoundError(f"Document {id} not found")
-
-        target_path = self.get_path_by_id(id)
-
-        # replace the document with the new data but the data can be partial in the document.
-        print(f"[DEBUG] new_data = {data}") if DEBUG else None
-        print(f"[DEBUG] document = {document}") if DEBUG else None
-        for key, value in data.items():
-            if key in document:
-                document[key] = value
-            else:
-                document[key] = value
-
-        JSONHandler.write_json_file(target_path, document)
-        print(f"Document {id} updated")
-
-    def _defaut_data(self, file_name):
-        return {
-                "message": "This is a JSON file created based on the file name.",
-                "file_name": file_name
-                }
-    
     def insert_one(self, collection_name, data):
 
         file_name = get_random_uuid()
@@ -85,6 +59,33 @@ class SimpleDocumentDB:
 
         return id_result
 
+    def update_document_by_id(self, collection_name, data, id):
+        
+        document = self.get_document_by_id(id)
+        if not document:
+            print(f"Document {id} not found")
+            raise DocumentNotFoundError(f"Document {id} not found")
+
+        target_path = self.get_path_by_id(id)
+
+        # replace the document with the new data but the data can be partial in the document.
+        print(f"[DEBUG] new_data = {data}") if DEBUG else None
+        print(f"[DEBUG] document = {document}") if DEBUG else None
+        for key, value in data.items():
+            if key in document:
+                document[key] = value
+            else:
+                document[key] = value
+
+        JSONHandler.parse_data(target_path, document)
+        print(f"Document {id} updated")
+
+    def _defaut_data(self, file_name):
+        return {
+                "message": "This is a JSON file created based on the file name.",
+                "file_name": file_name
+                }
+
     def find(self, collection, query=None):
         self.populating_db_state()
         results = []
@@ -102,6 +103,31 @@ class SimpleDocumentDB:
                     results.append({id: document})
 
         return results
+
+    def indexing_documents(self):
+        self.get_all_keys()
+
+        print(f"[DEBUG] document_values_to_index = {self.document_values_to_index}") #if DEBUG else None
+        for value in self.document_values_to_index:
+            index = SimpleIndex(value)
+            for id in self.ids:
+                if self.is_document_inactive(id):
+                    continue
+                document = self.get_document_by_id(id)
+                document_dict = self.convert_to_dict(document)
+                index.index_document(id, document_dict)
+                
+                self.indexes[value] = index
+
+
+
+    def get_all_keys(self):
+        for id in self.ids:
+            if self.is_document_inactive(id):
+                continue
+            document = self.get_document_by_id(id)
+            document_dict = self.convert_to_dict(document)
+            self.document_values_to_index += get_all_values_from_dict(document_dict)
 
     def convert_to_dict(self, document) -> dict:
         if isinstance(document, dict):
@@ -140,9 +166,6 @@ class SimpleDocumentDB:
         self.ids = ids
         self.ids_collection = ids_collection
 
-    def update_one(self, collection, query, update_fields):
-        ...
-
     def delete_document_by_id(self, id):
         # TODO: Add bulk delete functionality
         if self.is_document_inactive(id):
@@ -172,8 +195,13 @@ class SimpleDocumentDB:
         raise DocumentNotFoundError(f"Document {id} not found")
 
     def is_document_inactive(self, id):
-        return not self.id_status.get(id) or self.id_status.get(id) == DocumentStatus.SOFT_DELETE
+        return self.id_status.get(id) is None or self.id_status.get(id) == DocumentStatus.SOFT_DELETE
 
+    def get_path_by_id(self, id):
+                
+        if id in self.ids_collection:
+            return os.path.join(self.db_path, self.ids_collection[id], f"{id}.json")
+        return os.path.join(self.db_path, f"{id}.json")
 
     def init_collection(self, collection_name):
 
