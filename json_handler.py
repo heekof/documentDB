@@ -2,7 +2,6 @@ import json
 import os
 import json
 
-from db_utils.utils import get_random_uuid
 from global_state import DEBUG
 
 from errors import Error
@@ -53,25 +52,6 @@ class JSONHandler:
             json.dump(data, file, indent=4)
 
     @staticmethod
-    def parse_data(data, source_db, collection_name=None) -> str:
-        
-        file_name = get_random_uuid()
-
-        source_db_path = source_db.db_path
-        target_path = f"{source_db_path}/{collection_name}" if collection_name is not None else f"{source_db_path}"
-        storage_path = f"{target_path}/{file_name}.json"
-
-        source_db.init_collection(collection_name)
-
-        if not data:
-            data = {
-                "message": "This is a JSON file created based on the file name.",
-                "file_name": file_name
-                }
-
-        if not JSONHandler.is_json_compatible(data):
-            raise Error(f"Data is not JSON compatible: {data}")
-        
+    def parse_data(data, storage_path):        
         JSONHandler.write_json_file(storage_path, data)
-        return file_name
         

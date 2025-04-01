@@ -3,6 +3,7 @@ import os
 import shutil
 from simple_document_db import SimpleDocumentDB
 import json
+from errors import DocumentNotFoundError
 
 class TestSimpleDocumentDB(unittest.TestCase):
 
@@ -46,7 +47,7 @@ class TestSimpleDocumentDB(unittest.TestCase):
 
 
     def test_get_document_by_id_not_found(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(DocumentNotFoundError):
             self.db.get_document_by_id("c547e6bd-d291-482e-9e5d-6164211cff7d")
 
 
@@ -64,7 +65,7 @@ class TestSimpleDocumentDB(unittest.TestCase):
     def test_delete_document_by_id(self):
         doc_id = self.db.insert_one("users", {"name": "Ikram", "age": 30})
         self.db.delete_document_by_id(doc_id)
-        with self.assertRaises(Exception):
+        with self.assertRaises(DocumentNotFoundError):
             self.db.get_document_by_id(doc_id)
 
     def test_get_document_by_id(self):
