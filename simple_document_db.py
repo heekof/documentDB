@@ -10,13 +10,8 @@ from document_state import DocumentStatus
 
 DEBUG = Settings.DEBUG
 
-# TODO: Implement a simple query language for more flexible searches
-# TODO: Add support for data export and import (e.g., CSV, JSON)
-# TODO: Implement basic analytics functions (e.g., count, sum, average)
-
 class SimpleDocumentDB:
     def __init__(self, db_path="mydb", settings: Settings = Settings):
-        # TODO: Consider adding a configuration file for default settings
         # TODO: Implement logging instead of print statements for better debugging        
         self.db_path = db_path
         os.makedirs(self.db_path, exist_ok=True)
@@ -65,8 +60,7 @@ class SimpleDocumentDB:
                 }
     
     def insert_one(self, collection_name, data):
-        # TODO: Implement data validation (e.g., schema validation)
-        # TODO: Add support for auto-incrementing IDs as an alternative to UUIDs
+
         file_name = get_random_uuid()
 
         source_db_path = self.db_path
@@ -92,8 +86,6 @@ class SimpleDocumentDB:
         return id_result
 
     def find(self, collection, query=None):
-        # TODO: Implement more advanced querying (e.g., regex, greater than, less than)
-        # TODO: Add pagination support for large result sets
         self.populating_db_state()
         results = []
         for id in self.ids:
@@ -151,7 +143,6 @@ class SimpleDocumentDB:
     def update_one(self, collection, query, update_fields):
         ...
 
-    # TODO : add to test
     def delete_document_by_id(self, id):
         # TODO: Add bulk delete functionality
         if self.is_document_inactive(id):
@@ -162,7 +153,6 @@ class SimpleDocumentDB:
         self.id_status[id] = DocumentStatus.SOFT_DELETE
         return True
     
-    # TODO : add to test
     def hard_delete_document_by_id(self, id):
 
         target_path = self.get_path_by_id(id)
