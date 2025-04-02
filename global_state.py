@@ -30,6 +30,12 @@ class Settings:
         """Get a setting dynamically, providing a default."""
         return cls._settings_data.get(key, default)
 
+    def __repr__(self):
+        return f"{self._settings_data}"
+
+    def __str__(self):
+        return f"{self._settings_data}"
+
 
 if __name__ == "__main__":
 

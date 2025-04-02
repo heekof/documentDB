@@ -30,7 +30,7 @@ class SimpleDocumentDB:
 
         print(f"Database initialized at {self.db_path}")
 
-        print(f"[DEBUG] settings = {self.settings}, type = {type(self.settings)}, port = {self.settings.get("port")}") if DEBUG else None
+        print(f"[DEBUG] settings = {self.settings}, type = {type(self.settings)}, port = {self.settings.get('port')}") if DEBUG else None
 
 
     def insert_one(self, collection_name, data):
@@ -57,6 +57,10 @@ class SimpleDocumentDB:
             self.ids_collection[id_result] = collection_name
             self.id_status[id_result] = DocumentStatus.ACTIVE
 
+            data = self.convert_to_dict(data)
+            
+            self._index_document(id_result, data)
+
         return id_result
 
     def update_document_by_id(self, collection_name, data, id):
@@ -71,14 +75,30 @@ class SimpleDocumentDB:
         # replace the document with the new data but the data can be partial in the document.
         print(f"[DEBUG] new_data = {data}") if DEBUG else None
         print(f"[DEBUG] document = {document}") if DEBUG else None
+
+        # removing old index for this document
+        self._remove_index_for_document(id)
+
+        # indexing document with new data
+        self._index_document(id, data)
+
         for key, value in data.items():
             if key in document:
                 document[key] = value
             else:
                 document[key] = value
 
-        JSONHandler.parse_data(target_path, document)
+        JSONHandler.parse_data(document, target_path)
         print(f"Document {id} updated")
+
+    def _index_document(self, doc_id, data):
+        for key, value in data.items():
+            if value not in self.indexes:
+                index = SimpleIndex(value)
+                index.index_document(doc_id, data)
+                self.indexes[value] = index
+            else:
+                self.indexes[value].index_document(doc_id, data)
 
     def _defaut_data(self, file_name):
         return {
@@ -107,19 +127,22 @@ class SimpleDocumentDB:
     def indexing_documents(self):
         self.get_all_keys()
 
-        print(f"[DEBUG] document_values_to_index = {self.document_values_to_index}") #if DEBUG else None
         for value in self.document_values_to_index:
-            index = SimpleIndex(value)
+            if value not in self.indexes:
+                index = SimpleIndex(value)
+            else:
+                index = self.indexes[value]
+
+
             for id in self.ids:
                 if self.is_document_inactive(id):
                     continue
                 document = self.get_document_by_id(id)
                 document_dict = self.convert_to_dict(document)
+
                 index.index_document(id, document_dict)
-                
+
                 self.indexes[value] = index
-
-
 
     def get_all_keys(self):
         for id in self.ids:
@@ -165,16 +188,28 @@ class SimpleDocumentDB:
 
         self.ids = ids
         self.ids_collection = ids_collection
+        self.id_status = ids_status
 
     def delete_document_by_id(self, id):
         # TODO: Add bulk delete functionality
         if self.is_document_inactive(id):
             print(f"Document {id} not found")
             raise DocumentNotFoundError(f"Document {id} not found")
+        
+        deleted_data = self.get_document_by_id(id)
+
+        self._remove_index_for_document(id)
 
         print(f"Document {id} deleted")
         self.id_status[id] = DocumentStatus.SOFT_DELETE
+
         return True
+
+    def _remove_index_for_document(self, id):
+        document = self.get_document_by_id(id)
+        for key, value in document.items():
+            if value in self.indexes:
+                self.indexes[value].remove_document(id)
     
     def hard_delete_document_by_id(self, id):
 
