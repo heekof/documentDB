@@ -119,6 +119,29 @@ class TestSimpleDocumentDB(unittest.TestCase):
         doc = self.db.get_document_by_id(doc_id)
         self.assertEqual(doc, self._sample_data)
 
+
+    def test_index_document(self):
+        doc_id = self.db.insert_one("users",{ "name": "Jaafar", "age": 34})
+        results = self.db.indexes["Jaafar"]
+        r_id = results.index['Jaafar'][0]
+        self.assertEqual(r_id, doc_id)
+
+    def test_index_after_deleting_document(self):
+        doc_id = self.db.insert_one("users",{ "name": "Jaafar", "age": 34})
+        self.db.delete_document_by_id(doc_id)
+        print(f"[DEBUG] indexes = {self.db.indexes.keys()}")
+        print(f"[DEBUG] indexes = {self.db.indexes[34]}")
+        print(f"[DEBUG] indexes = {self.db.indexes['Jaafar']}")
+        # print(f"[DEBUG] indexes = {self.db.indexes["Jaafar"]}")
+        self.assertEqual(len(self.db.indexes[34]), 0)
+        self.assertEqual(len(self.db.indexes['Jaafar']), 0)
+
+    def test_index_after_updating_document(self):
+        doc_id = self.db.insert_one("users",{ "name": "Jaafar", "age": 34})
+        self.db.update_document_by_id("users", {"name": "Jaafar", "age": 35}, doc_id)
+        self.assertEqual(len(self.db.indexes[34]), 0)
+        self.assertEqual(len(self.db.indexes[35]), 1)
+
 if __name__ == '__main__':
     unittest.main()
     # python -m unittest discover -s tests

@@ -43,6 +43,7 @@ class JSONHandler:
 
     @staticmethod
     def write_json_file(file_path, data):
+        print(f"[DEBUG] Writing data: {data} to {file_path}") if DEBUG else None
         with open(file_path, 'w', encoding='utf-8') as file:
             json.dump(data, file, indent=4)
 
