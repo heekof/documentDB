@@ -39,11 +39,13 @@ class SimpleIndex:
             if len(self.index[key]) == 0:
                 del self.index[key]
 
+    # Called by: str(obj) or print(obj)
     def __str__(self):
-        return str(self.index)
+        return f"{self.key_index}: {self.index}"
 
+    # Called by: repr(obj) or just typing obj in the interactive shell.
     def __repr__(self):
-        return str(self.index)
+        return f"SimpleIndex(key_index={self.key_index}, index={self.index})"
 
     def __len__(self):
         return len(self.index)
