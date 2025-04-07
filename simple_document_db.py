@@ -15,7 +15,7 @@ from simple_index import SimpleIndex
 from db_utils.utils import get_all_values_from_dict
 
 class SimpleDocumentDB:
-    def __init__(self, db_path="mydb", settings: Settings = Settings):
+    def __init__(self, db_path="simple_db_data", settings: Settings = Settings):
         # TODO: Implement logging instead of print statements for better debugging        
         self.db_path = db_path
         os.makedirs(self.db_path, exist_ok=True)
@@ -105,6 +105,10 @@ class SimpleDocumentDB:
                 "message": "This is a JSON file created based on the file name.",
                 "file_name": file_name
                 }
+    
+    def generate_db_fake_data(self, number_of_documents=10):
+        for i in range(number_of_documents):
+            self.insert_one("test_collection", self._defaut_data(i))
 
     def find(self, collection, query=None):
         self.populating_db_state()

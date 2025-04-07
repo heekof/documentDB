@@ -3,3 +3,5 @@ __pycache__/
 .env
 *.log
 .vscode
+mydb
+simple_db_data
