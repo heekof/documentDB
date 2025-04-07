@@ -23,3 +23,40 @@ def read_json_file(file_path):
     except Exception as e:
         print(f"An unexpected error occurred reading '{file_path}': {e}")
         return {}
+
+
+def get_all_values_from_dict(dictionary : dict) -> list:
+    values = []
+    if isinstance(dictionary, dict):
+        for v in dictionary.values():
+            values.extend(get_all_values_from_dict(v))
+    elif isinstance(dictionary, list):
+        for item in dictionary:
+            values.extend(get_all_values_from_dict(item))
+    else:
+        values.append(dictionary)
+    return values
+
+
+def walkthrough_dict(dictionary: dict):
+    for key, value in dictionary.items():
+        if isinstance(value, dict):
+            walkthrough_dict(value)
+        else:
+            print(f"Key: {key}, Value: {value}")
+
+
+def walkthrough_dict_apply_function(dictionary: dict, func : callable):
+    for key, value in dictionary.items():
+        if isinstance(value, dict):
+            walkthrough_dict_apply_function(value, func)
+        else:
+            func(key, value)
+
+
+if __name__ == "__main__":
+    dictionary = { "key1": "value1", "key2": { "key3": "value3", "key4": "value4", "key5": "".join(["v1","v2","v3"]) } }
+
+    print(
+        walkthrough_dict_apply_function(dictionary, lambda key, value: print(key+"_"+value) ) )
+        
